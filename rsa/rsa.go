@@ -80,8 +80,8 @@ func GenerateRSAKeyFile(bits int, file string) error {
 }
 
 // SignRSA ras签名 返回签名信息后的base64 (sha256)
-func SignRSA(data []byte, pri []byte) (string, error) {
-	myHash := crypto.SHA256
+func SignRSA(hashtype crypto.Hash, data []byte, pri []byte) (string, error) {
+	myHash := hashtype
 	hashInstance := myHash.New()
 	hashInstance.Write(data)
 	hashed := hashInstance.Sum(nil)
@@ -106,12 +106,12 @@ func SignRSA(data []byte, pri []byte) (string, error) {
 }
 
 // data 签名原始数据  base64Sig签名后base64的数据  pub公钥（sha256）
-func VerifyRSA(data []byte, base64Sig string, pub []byte) bool {
+func VerifyRSA(hashtype crypto.Hash, data []byte, base64Sig string, pub []byte) bool {
 	bytes, err := base64.StdEncoding.DecodeString(base64Sig)
 	if err != nil {
 		return false
 	}
-	myHash := crypto.SHA256
+	myHash := hashtype
 	hashInstance := myHash.New()
 	hashInstance.Write(data)
 	hashed := hashInstance.Sum(nil)
