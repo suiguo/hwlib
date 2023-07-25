@@ -93,6 +93,9 @@ func parseEcdsaPub(base64pub string) (*ecdsa.PublicKey, error) {
 		return nil, err
 	}
 	//解析curvetype
+	if len(pub) < 4 {
+		return nil, fmt.Errorf("formate error")
+	}
 	idx := 0
 	lenbytes := pub[idx : idx+4]
 	length := bytesToInt(lenbytes)
