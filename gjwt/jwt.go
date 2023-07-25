@@ -181,7 +181,14 @@ func (u *utils) VerifyToken(token string, jwtdata interface{}) (verifyrs bool, v
 		return false, err
 	}
 	if claims, ok := t.Claims.(gojwt.MapClaims); ok && t.Valid {
-		d, e := json.Marshal(claims)
+		if jwtdata == nil {
+			return true, nil
+		}
+		data, ok := claims["data"]
+		if !ok {
+			return true, nil
+		}
+		d, e := json.Marshal(data)
 		if e != nil {
 			return false, e
 		}
