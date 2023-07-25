@@ -190,16 +190,15 @@ func (u *utils) VerifyToken(token string, jwtdata interface{}) (verifyrs bool, v
 		}
 		d, e := json.Marshal(data)
 		if e != nil {
-			return false, e
+			return true, e
 		}
 		err := json.Unmarshal(d, jwtdata)
 		if err != nil {
-			return false, err
+			return true, err
 		}
 		return true, nil
-	} else {
-		return false, fmt.Errorf("verify fail")
 	}
+	return false, fmt.Errorf("verify fail")
 }
 func (u *utils) SetSecretPub(method MethodSigning, key []byte) {
 	u.secretMap.Store(method, key)
