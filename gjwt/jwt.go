@@ -97,7 +97,7 @@ func (u *utils) SignData(signtype MethodSigning, data interface{}, expires time.
 		if p, ok := priv.([]byte); ok {
 			key = ed25519.PrivateKey(p)
 		} else {
-			key = p
+			key = priv
 		}
 	case MethodECDSA256, MethodECDSA384, MethodECDSA512:
 		if p, ok := priv.([]byte); ok {
@@ -108,7 +108,7 @@ func (u *utils) SignData(signtype MethodSigning, data interface{}, expires time.
 			key = tmp
 			u.privMap.Store(signtype, tmp)
 		} else {
-			key = p
+			key = priv
 		}
 	case MethodRSA256, MethodRSA384, MethodRSA512, MethodRSAPSS256, MethodRSAPSS384, MethodRSAPSS512:
 		if p, ok := priv.([]byte); ok {
@@ -119,7 +119,7 @@ func (u *utils) SignData(signtype MethodSigning, data interface{}, expires time.
 			key = tmp
 			u.privMap.Store(signtype, tmp)
 		} else {
-			key = p
+			key = priv
 		}
 	case MethodHMAC256, MethodHMAC384, MethodHMAC512:
 		if p, ok := priv.([]byte); ok {
