@@ -96,7 +96,7 @@ func SignRSA(hashtype crypto.Hash, data []byte, pri []byte) (string, error) {
 	}
 	privateKey, ok := pkcs8key.(*rsa.PrivateKey)
 	if !ok {
-		return "", err
+		return "", fmt.Errorf("privatekey is error")
 	}
 	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hashed)
 	if err != nil {
@@ -129,4 +129,37 @@ func VerifyRSA(hashtype crypto.Hash, data []byte, base64Sig string, pub []byte) 
 	}
 	err = rsa.VerifyPKCS1v15(publicKey, myHash, hashed, bytes)
 	return err == nil
+}
+
+func Encrypt(pub []byte, data []byte) ([]byte, error) {
+	block, _ := pem.Decode(pub)
+	if block == nil {
+		return nil, fmt.Errorf("block is nil")
+	}
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	publicKey, ok := publicKeyInterface.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("pub error")
+	}
+	return rsa.EncryptPKCS1v15(rand.Reader, publicKey, data)
+}
+
+func Decrypt(pri []byte, data []byte) ([]byte, error) {
+	block, _ := pem.Decode(pri)
+	if block == nil {
+		return nil, fmt.Errorf("block is nil")
+	}
+	// x509.ParsePKCSPrivateKey()
+	pkcs8key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, ok := pkcs8key.(*rsa.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("private key error")
+	}
+	return rsa.DecryptPKCS1v15(rand.Reader, privateKey, data)
 }
