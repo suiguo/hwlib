@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -20,7 +21,7 @@ type task struct {
 	dur     time.Duration
 }
 
-//一个时间轮
+// 一个时间轮
 type Ticker struct {
 	sync.Mutex
 	degree     time.Duration
@@ -39,7 +40,7 @@ func (t *Ticker) addTask(dur int, input *task) {
 	t.slots[idx] = append(t.slots[idx], input)
 }
 
-//工作
+// 工作
 func (t *Ticker) tick() ([]*task, bool) {
 	newRound := false
 	t.Lock()
@@ -66,8 +67,10 @@ type Timer struct {
 	sec      *Ticker
 	min      *Ticker
 	hour     *Ticker
-	stop     chan bool
+	cancle   context.CancelFunc
 	lastTick time.Time
+	isRun    bool
+	sync.Once
 }
 
 func NewTimer() *Timer {
@@ -76,7 +79,6 @@ func NewTimer() *Timer {
 		sec:  newTicker(time.Second, 60, now),
 		min:  newTicker(time.Minute, 60, now),
 		hour: newTicker(time.Hour, 24, now),
-		stop: make(chan bool, 1),
 	}
 	return t
 }
@@ -116,39 +118,46 @@ func (t *Timer) addTick(elem *task) {
 		t.hour.addTask(elem.hour, elem)
 	}
 }
-func (t *Timer) Run() *sync.WaitGroup {
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		for {
-			select {
-			case <-time.After(time.Millisecond * 50):
-				now := time.Now()
-				if now.Sub(t.lastTick) < time.Second {
-					continue
+
+func (t *Timer) Run() error {
+	if t.isRun {
+		return fmt.Errorf("already in running")
+	}
+	t.Do(func() {
+		ctx, cancle := context.WithCancel(context.Background())
+		t.cancle = cancle
+		t.isRun = true
+		go func() {
+			for {
+				select {
+				case <-time.After(time.Millisecond * 50):
+					now := time.Now()
+					if now.Sub(t.lastTick) < time.Second {
+						continue
+					}
+					t.lastTick = now
+					secTask, up := t.sec.tick()
+					go t.doTask(SEC, secTask)
+					if !up {
+						continue
+					}
+					minTask, up := t.min.tick()
+					go t.doTask(MIN, minTask)
+					if !up {
+						continue
+					}
+					hourTask, _ := t.hour.tick()
+					go t.doTask(HOUR, hourTask)
+				case <-ctx.Done():
+					return
 				}
-				t.lastTick = now
-				secTask, up := t.sec.tick()
-				go t.doTask(SEC, secTask)
-				if !up {
-					continue
-				}
-				minTask, up := t.min.tick()
-				go t.doTask(MIN, minTask)
-				if !up {
-					continue
-				}
-				hourTask, _ := t.hour.tick()
-				go t.doTask(HOUR, hourTask)
-			case <-t.stop:
-				wg.Done()
 			}
-		}
-	}()
-	return wg
+		}()
+	})
+	return nil
 }
 func (t *Timer) Stop() {
-	t.stop <- true
+	t.cancle()
 }
 func (t *Timer) doTask(lv int, tasks []*task) {
 	for _, elem := range tasks {
