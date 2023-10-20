@@ -120,10 +120,12 @@ func (g *gbot) messageHandler(ctx context.Context) {
 				continue
 			}
 			m := &Message{
+				MessageId:        msg.Message.MessageID,
 				FromUserId:       msg.Message.From.ID,
 				Msg:              msg.Message.Text,
 				MessageTimestamp: int64(msg.Message.Date),
 				MsgType:          MessageType(msg.Message.Chat.Type),
+				Base:             TgMessage(msg),
 			}
 			if !msg.Message.Chat.IsPrivate() {
 				m.FromGroupId = msg.Message.Chat.ID

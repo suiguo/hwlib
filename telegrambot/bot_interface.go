@@ -11,6 +11,8 @@ type Message struct {
 	FromGroupId      int64       //群组id
 	Msg              string      //text消息
 	MsgType          MessageType //消息类型
+	MessageId        int
+	Base             TgMessage
 }
 
 const (
