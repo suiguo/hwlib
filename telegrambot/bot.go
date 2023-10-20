@@ -3,10 +3,12 @@ package telegrambot
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync/atomic"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/suiguo/hwlib/logger"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type TgMessage tgbotapi.Update
@@ -19,7 +21,7 @@ const (
 
 type gbot struct {
 	isdebug bool
-	log     logger.Logger
+	*zap.SugaredLogger
 	token   string
 	api     *tgbotapi.BotAPI
 	data_ch tgbotapi.UpdatesChannel //消息channel
@@ -29,15 +31,28 @@ type gbot struct {
 	MessageHandler
 }
 
-func (g *gbot) init(token string, debug bool) (e error) {
+func (g *gbot) initlog(debug bool) {
+	writeSyncer := zapcore.AddSync(os.Stdout)
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	encoder := zapcore.NewConsoleEncoder(encoderConfig)
+	cores := make([]zapcore.Core, 0)
 	if debug {
-		g.log = logger.NewStdLoggerWithLevel(2, -1)
+		cores = append(cores, zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel))
 	} else {
-		g.log = logger.NewStdLoggerWithLevel(2, 0)
+		cores = append(cores, zapcore.NewCore(encoder, writeSyncer, zapcore.InfoLevel))
 	}
+	handler := zapcore.NewTee(cores...)
+	zaplogger := zap.New(handler, zap.AddCaller(), zap.AddCallerSkip(1)) //修改堆栈深度
+	sugarLogger := zaplogger.Sugar()
+	g.SugaredLogger = sugarLogger
+}
+func (g *gbot) init(token string, debug bool) (e error) {
+	g.initlog(debug)
 	defer func() {
-		if e != nil && g.log != nil {
-			g.log.Debug("init", "err", e)
+		if e != nil && g.SugaredLogger != nil {
+			g.Debugw("init", "err", e)
 		}
 	}()
 	api, err := tgbotapi.NewBotAPI(token)
@@ -55,9 +70,9 @@ func (g *gbot) init(token string, debug bool) (e error) {
 
 func (g *gbot) Run() (e error) {
 	defer func() {
-		if g.log != nil {
+		if g.SugaredLogger != nil {
 			if e != nil {
-				g.log.Debug("Run", "err", e)
+				g.Debugw("Run", "err", e)
 			}
 		}
 	}()
@@ -88,7 +103,9 @@ func (g *gbot) messageHandler(ctx context.Context) {
 	for {
 		select {
 		case msg := <-g.data_ch:
-			g.log.Debug("Message", "recive", msg)
+			if g.SugaredLogger != nil {
+				g.Debugw("Message", "recive", msg)
+			}
 			if g.MessageHandler == nil {
 				continue
 			}
@@ -122,7 +139,9 @@ func (g *gbot) messageHandler(ctx context.Context) {
 				g.ReciveMsg(MessageType(msg.Message.Chat.Type), m)
 			}
 		case <-ctx.Done():
-			g.log.Debug("MessageHandler", "status", "quit")
+			if g.SugaredLogger != nil {
+				g.Debugw("MessageHandler", "status", "quit")
+			}
 			return
 		}
 	}
