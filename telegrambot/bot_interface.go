@@ -27,7 +27,7 @@ type MessageHandler interface {
 	//收到的消息(简化只处理文本消息)
 	ReciveMsg(MessageType, *Message)
 	//所有未经过滤的消息
-	AllMsg(tgbotapi.Update)
+	AllMsg(TgMessage)
 }
 
 type Bot interface {

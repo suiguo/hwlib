@@ -9,6 +9,7 @@ import (
 	"github.com/suiguo/hwlib/logger"
 )
 
+type TgMessage tgbotapi.Update
 type Status int32
 
 const (
@@ -91,7 +92,7 @@ func (g *gbot) messageHandler(ctx context.Context) {
 			if g.MessageHandler == nil {
 				continue
 			}
-			g.AllMsg(msg)
+			g.AllMsg(TgMessage(msg))
 			if msg.Message == nil {
 				continue
 			}
