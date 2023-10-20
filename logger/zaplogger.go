@@ -26,6 +26,7 @@ type LoggerCfg struct {
 
 var once sync.Once
 var instance *StdLogger
+var levelInstance *StdLogger
 var logger_map = make(map[string]*StdLogger)
 var logger_lock sync.RWMutex
 
@@ -83,7 +84,7 @@ func GetInstance(tag string, cfg []*LoggerCfg, skipCall int) (*StdLogger, error)
 	return instance, nil
 }
 
-// NewStdLogger is
+// NewStdLogger is 输出到控制台. 多次调用只初始化一次
 func NewStdLogger(callerSkip int) *StdLogger {
 	if instance == nil {
 		once.Do(func() {
@@ -100,6 +101,29 @@ func NewStdLogger(callerSkip int) *StdLogger {
 		})
 	}
 	return instance
+}
+
+// NewStdLogger is 输出到控制台. 多次调用只初始化一次。
+//
+// level
+//
+//	DebugLevel -1 InfoLevel 0 WarnLevel 1 ErrorLevel  2 DPanicLevel 3  PanicLevel 4  FatalLevel 5
+func NewStdLoggerWithLevel(callerSkip int, level int) *StdLogger {
+	if levelInstance == nil {
+		once.Do(func() {
+			writeSyncer := getLogWriter()
+			encoder := getEncoder()
+			cores := make([]zapcore.Core, 0)
+			cores = append(cores, zapcore.NewCore(encoder, writeSyncer, zapcore.Level(level)))
+			handler := zapcore.NewTee(cores...)
+			zaplogger := zap.New(handler, zap.AddCaller(), zap.AddCallerSkip(callerSkip)) //修改堆栈深度
+			sugarLogger := zaplogger.Sugar()
+			levelInstance = &StdLogger{
+				logger: sugarLogger,
+			}
+		})
+	}
+	return levelInstance
 }
 
 func getEncoder() zapcore.Encoder {
