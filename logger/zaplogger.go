@@ -5,9 +5,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/natefinch/lumberjack"
 	zap "go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // StdLogger is struct
