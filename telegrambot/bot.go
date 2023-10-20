@@ -44,7 +44,7 @@ func (g *gbot) initlog(debug bool) {
 		cores = append(cores, zapcore.NewCore(encoder, writeSyncer, zapcore.InfoLevel))
 	}
 	handler := zapcore.NewTee(cores...)
-	zaplogger := zap.New(handler, zap.AddCaller(), zap.AddCallerSkip(2)) //修改堆栈深度
+	zaplogger := zap.New(handler, zap.AddCaller(), zap.AddCallerSkip(0)) //修改堆栈深度
 	sugarLogger := zaplogger.Sugar()
 	g.SugaredLogger = sugarLogger
 }
