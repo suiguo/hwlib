@@ -27,9 +27,9 @@ const (
 type MessageHandler interface {
 	Type() []MessageType
 	//收到的消息(简化只处理文本消息)
-	ReciveMsg(MessageType, *Message)
+	ReciveMsg(Bot, MessageType, *Message)
 	//所有未经过滤的消息
-	AllMsg(TgMessage)
+	AllMsg(Bot, TgMessage)
 }
 
 type Bot interface {

@@ -109,7 +109,7 @@ func (g *gbot) messageHandler(ctx context.Context) {
 			if g.MessageHandler == nil {
 				continue
 			}
-			g.AllMsg(TgMessage(msg))
+			g.AllMsg(g, TgMessage(msg))
 			if msg.Message == nil {
 				continue
 			}
@@ -138,7 +138,7 @@ func (g *gbot) messageHandler(ctx context.Context) {
 				}
 			}
 			if pass {
-				g.ReciveMsg(MessageType(msg.Message.Chat.Type), m)
+				g.ReciveMsg(g, MessageType(msg.Message.Chat.Type), m)
 			}
 		case <-ctx.Done():
 			if g.SugaredLogger != nil {
