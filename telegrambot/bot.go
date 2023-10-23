@@ -139,7 +139,7 @@ func (g *gbot) messageHandler(ctx context.Context) {
 					MsgType:          MessageType(msg.CallbackQuery.Message.Chat.Type),
 					Base:             TgMessage(msg),
 				}
-				if !msg.Message.Chat.IsPrivate() {
+				if !msg.CallbackQuery.Message.Chat.IsPrivate() {
 					m.FromGroupId = msg.CallbackQuery.Message.Chat.ID
 				}
 			}
