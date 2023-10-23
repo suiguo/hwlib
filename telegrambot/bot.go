@@ -133,7 +133,7 @@ func (g *gbot) messageHandler(ctx context.Context) {
 				m = &Message{
 					IsCallBack:       true,
 					MessageId:        msg.CallbackQuery.Message.MessageID,
-					FromUserId:       msg.CallbackQuery.Message.From.ID,
+					FromUserId:       msg.CallbackQuery.From.ID,
 					Msg:              msg.CallbackQuery.Data,
 					MessageTimestamp: int64(msg.CallbackQuery.Message.Date),
 					MsgType:          MessageType(msg.CallbackQuery.Message.Chat.Type),
