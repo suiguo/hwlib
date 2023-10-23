@@ -148,13 +148,13 @@ func (g *gbot) messageHandler(ctx context.Context) {
 			}
 			pass := false
 			for _, t := range g.Type() {
-				if t == TypeAll || string(t) == msg.Message.Chat.Type {
+				if t == TypeAll || string(t) == string(m.MsgType) {
 					pass = true
 					break
 				}
 			}
 			if pass {
-				g.ReciveMsg(g, MessageType(msg.Message.Chat.Type), m)
+				g.ReciveMsg(g, MessageType(m.MsgType), m)
 			}
 		case <-ctx.Done():
 			if g.SugaredLogger != nil {
