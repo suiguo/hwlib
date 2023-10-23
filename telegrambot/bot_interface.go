@@ -11,6 +11,7 @@ type Message struct {
 	FromGroupId      int64       //群组id
 	Msg              string      //text消息
 	MsgType          MessageType //消息类型
+	IsCallBack       bool        //是否是回调消息
 	MessageId        int
 	Base             TgMessage
 }

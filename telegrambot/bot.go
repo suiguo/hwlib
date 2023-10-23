@@ -110,25 +110,41 @@ func (g *gbot) messageHandler(ctx context.Context) {
 				continue
 			}
 			g.AllMsg(g, TgMessage(msg))
-			if msg.Message == nil {
+			var m *Message
+			//普通消息
+			if msg.Message != nil && msg.Message.Chat != nil && msg.Message.From != nil {
+				m = &Message{
+					MessageId:        msg.Message.MessageID,
+					FromUserId:       msg.Message.From.ID,
+					Msg:              msg.Message.Text,
+					MessageTimestamp: int64(msg.Message.Date),
+					MsgType:          MessageType(msg.Message.Chat.Type),
+					Base:             TgMessage(msg),
+				}
+				if !msg.Message.Chat.IsPrivate() {
+					m.FromGroupId = msg.Message.Chat.ID
+				}
+			}
+			//call back 消息
+			if msg.CallbackQuery != nil &&
+				msg.CallbackQuery.Message != nil &&
+				msg.CallbackQuery.Message.Chat != nil &&
+				msg.CallbackQuery.Message.From != nil {
+				m = &Message{
+					IsCallBack:       true,
+					MessageId:        msg.CallbackQuery.Message.MessageID,
+					FromUserId:       msg.CallbackQuery.Message.From.ID,
+					Msg:              msg.CallbackQuery.Data,
+					MessageTimestamp: int64(msg.CallbackQuery.Message.Date),
+					MsgType:          MessageType(msg.CallbackQuery.Message.Chat.Type),
+					Base:             TgMessage(msg),
+				}
+				if !msg.Message.Chat.IsPrivate() {
+					m.FromGroupId = msg.CallbackQuery.Message.Chat.ID
+				}
+			}
+			if m.MessageId == 0 {
 				continue
-			}
-			if msg.Message.Chat == nil {
-				continue
-			}
-			if msg.Message.From == nil {
-				continue
-			}
-			m := &Message{
-				MessageId:        msg.Message.MessageID,
-				FromUserId:       msg.Message.From.ID,
-				Msg:              msg.Message.Text,
-				MessageTimestamp: int64(msg.Message.Date),
-				MsgType:          MessageType(msg.Message.Chat.Type),
-				Base:             TgMessage(msg),
-			}
-			if !msg.Message.Chat.IsPrivate() {
-				m.FromGroupId = msg.Message.Chat.ID
 			}
 			pass := false
 			for _, t := range g.Type() {
