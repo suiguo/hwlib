@@ -200,11 +200,9 @@ func (t *Timer) doTask(lv int, tasks []*task) {
 			t.remove.Delete(elem.instance_id)
 			continue
 		}
-		go func(el *task) {
-			el.handler()
-			if el.repeat {
-				t.addTask(el)
-			}
-		}(elem)
+		elem.handler()
+		if elem.repeat {
+			t.addTask(elem)
+		}
 	}
 }
