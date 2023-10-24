@@ -9,6 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/google/uuid v1.3.0
 	github.com/nyaruka/phonenumbers v1.1.8
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/twilio/twilio-go v1.15.0
