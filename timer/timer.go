@@ -105,7 +105,7 @@ func (t *Timer) AddTask(dur time.Duration, repeat bool, handler Do) (string, err
 }
 
 func (t *Timer) RemoveTask(instanceid string) {
-	t.remove.Store(instanceid, "delete")
+	t.remove.Store(instanceid, time.Now().Unix())
 }
 
 func (t *Timer) addTask(elem *task) { //是否重复
@@ -138,9 +138,15 @@ func (t *Timer) Run() error {
 		t.cancle = cancle
 		t.isRun = true
 		go func() {
+			taskTick := time.NewTicker(time.Millisecond * 50)
+			delTick := time.NewTicker(time.Hour * 24)
+			defer func() {
+				taskTick.Stop()
+				delTick.Stop()
+			}()
 			for {
 				select {
-				case <-time.After(time.Millisecond * 50):
+				case <-taskTick.C:
 					now := time.Now()
 					if now.Sub(t.lastTick) < time.Second {
 						continue
@@ -158,6 +164,16 @@ func (t *Timer) Run() error {
 					}
 					hourTask, _ := t.hour.tick()
 					go t.doTask(HOUR, hourTask)
+				case <-delTick.C:
+					go func() {
+						now := time.Now().Unix()
+						t.remove.Range(func(key, value any) bool {
+							if now-value.(int64) > 3600*24 {
+								t.remove.Delete(key)
+							}
+							return true
+						})
+					}()
 				case <-ctx.Done():
 					return
 				}
@@ -184,9 +200,11 @@ func (t *Timer) doTask(lv int, tasks []*task) {
 			t.remove.Delete(elem.instance_id)
 			continue
 		}
-		if elem.repeat {
-			t.addTask(elem)
-		}
-		elem.handler()
+		go func(el *task) {
+			el.handler()
+			if el.repeat {
+				t.addTask(el)
+			}
+		}(elem)
 	}
 }
