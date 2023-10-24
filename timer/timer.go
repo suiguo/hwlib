@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const SEC int = 0
@@ -13,12 +15,13 @@ const HOUR int = 2
 
 type Do func()
 type task struct {
-	hour    int
-	min     int
-	sec     int
-	repeat  bool
-	handler Do
-	dur     time.Duration
+	hour        int
+	min         int
+	sec         int
+	repeat      bool
+	instance_id string
+	handler     Do
+	dur         time.Duration
 }
 
 // 一个时间轮
@@ -70,6 +73,7 @@ type Timer struct {
 	cancle   context.CancelFunc
 	lastTick time.Time
 	isRun    bool
+	remove   sync.Map
 	sync.Once
 }
 
@@ -83,21 +87,27 @@ func NewTimer() *Timer {
 	return t
 }
 
-func (t *Timer) AddTask(dur time.Duration, repeat bool, handler Do) error { //是否重复
+// 返回删除 唯一id
+func (t *Timer) AddTask(dur time.Duration, repeat bool, handler Do) (string, error) { //是否重复
 	if dur < time.Second {
-		return fmt.Errorf("min 1s")
+		return "", fmt.Errorf("min 1s")
 	}
 	if dur >= time.Hour*24 {
-		return fmt.Errorf("max 24h")
+		return "", fmt.Errorf("max 24h")
 	}
 	tmp := t.sec.currentIdx + int(dur/time.Second)
 	sec := tmp % 60
 	min := ((tmp/60)%60 + t.min.currentIdx) % 60
 	hour := (tmp/3600 + t.hour.currentIdx) % 24
-	elem := &task{hour: hour, min: min, sec: sec, repeat: repeat, dur: dur, handler: handler}
+	elem := &task{hour: hour, min: min, sec: sec, repeat: repeat, dur: dur, handler: handler, instance_id: uuid.NewString()}
 	t.addTick(elem)
-	return nil
+	return elem.instance_id, nil
 }
+
+func (t *Timer) RemoveTask(instanceid string) {
+	t.remove.Store(instanceid, "delete")
+}
+
 func (t *Timer) addTask(elem *task) { //是否重复
 	dur := elem.dur
 	tmp := t.sec.currentIdx + int(dur/time.Second)
@@ -167,6 +177,11 @@ func (t *Timer) doTask(lv int, tasks []*task) {
 		}
 		if elem.hour != 0 && (lv == SEC || lv == MIN) {
 			t.hour.addTask(elem.hour, elem)
+			continue
+		}
+		_, ok := t.remove.Load(elem.instance_id)
+		if ok {
+			t.remove.Delete(elem.instance_id)
 			continue
 		}
 		if elem.repeat {

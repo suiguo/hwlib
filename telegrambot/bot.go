@@ -178,8 +178,11 @@ func (g *gbot) SendMsg(msg tgbotapi.Chattable) error {
 	if g.api == nil {
 		return fmt.Errorf("not init")
 	}
-	_, err := g.api.Send(msg)
-	return err
+	if msg != nil {
+		_, err := g.api.Send(msg)
+		return err
+	}
+	return nil
 }
 
 func (g *gbot) RegHandler(h MessageHandler) {
