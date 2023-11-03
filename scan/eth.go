@@ -168,27 +168,36 @@ func (t *ethTool) AddContract(c ...Contract) {
 	}
 }
 func (t *ethTool) GetBlockNum() (int64, error) {
-	idx := t.requestId.Add(1)
-	out, code, err := Request(Post, t.url, nil, &JsonRpcParam{
-		Jsonrpc: "2.0",
-		Method:  "eth_blockNumber",
-		ID:      idx,
-	})
-	if err != nil {
-		return 0, err
+	for i := 0; i < 3; i++ {
+		idx := t.requestId.Add(1)
+		out, code, err := Request(Post, t.url, nil, &JsonRpcParam{
+			Jsonrpc: "2.0",
+			Method:  "eth_blockNumber",
+			ID:      idx,
+		})
+		if err != nil {
+			return 0, err
+		}
+		if code != 200 {
+			return 0, fmt.Errorf("not 200 code")
+		}
+		resp := &BlockNumber{}
+		err = json.Unmarshal(out, resp)
+		if err != nil {
+			return 0, err
+		}
+		if resp.Error.Code != 0 {
+			return 0, fmt.Errorf(resp.Error.Message)
+		}
+		r, err := strconv.ParseInt(resp.Result, 0, 64)
+		if err == nil {
+			return r, err
+		} else {
+			time.Sleep(time.Second * 2)
+		}
 	}
-	if code != 200 {
-		return 0, fmt.Errorf("not 200 code")
-	}
-	resp := &BlockNumber{}
-	err = json.Unmarshal(out, resp)
-	if err != nil {
-		return 0, err
-	}
-	if resp.Error.Code != 0 {
-		return 0, fmt.Errorf(resp.Error.Message)
-	}
-	return strconv.ParseInt(resp.Result, 0, 64)
+	return 0, fmt.Errorf("GetBlockNum error")
+
 }
 
 func (t *ethTool) GetContract(address string) (*Contract, bool) {
