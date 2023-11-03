@@ -405,31 +405,36 @@ func (t *ethTool) ChainType() ChainType {
 
 func (t *ethTool) hasTransfer(block int64) (bool, error) {
 	idx := t.requestId.Add(1)
-	out, code, err := Request(Post, t.url, nil, &JsonRpcParam{
-		Jsonrpc: "2.0",
-		Method:  "eth_getBlockTransactionCountByNumber",
-		ID:      idx,
-		Params:  []any{fmt.Sprintf("0x%x", block)},
-	})
-	if err != nil {
-		return false, err
+	for i := 0; i < 3; i++ {
+		out, code, err := Request(Post, t.url, nil, &JsonRpcParam{
+			Jsonrpc: "2.0",
+			Method:  "eth_getBlockTransactionCountByNumber",
+			ID:      idx,
+			Params:  []any{fmt.Sprintf("0x%x", block)},
+		})
+		if err != nil {
+			return false, err
+		}
+		if code != 200 {
+			return false, fmt.Errorf("not 200 code")
+		}
+		resp := &BlockNumber{}
+		err = json.Unmarshal(out, resp)
+		if err != nil {
+			return false, err
+		}
+		if resp.Error.Message != "" {
+			return false, fmt.Errorf(resp.Error.Message)
+		}
+		num, err := strconv.ParseInt(resp.Result, 0, 64)
+		if err == nil {
+			return num > 0, nil
+		} else {
+			Logger.Info("hasTransfer", "resp", resp)
+			time.Sleep(time.Second * 1)
+		}
 	}
-	if code != 200 {
-		return false, fmt.Errorf("not 200 code")
-	}
-	resp := &BlockNumber{}
-	err = json.Unmarshal(out, resp)
-	if err != nil {
-		return false, err
-	}
-	if resp.Error.Message != "" {
-		return false, fmt.Errorf(resp.Error.Message)
-	}
-	num, err := strconv.ParseInt(resp.Result, 0, 64)
-	if err != nil {
-		return false, err
-	}
-	return num > 0, nil
+	return false, fmt.Errorf("hasTransfer error")
 }
 
 // 波场解析
