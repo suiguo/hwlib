@@ -48,7 +48,8 @@ var signFunc = map[MethodSigning]gojwt.SigningMethod{
 }
 
 type JwtUitls interface {
-	VerifyToken(token string, jwtdata interface{}) (bool, error)
+	VerifyAndMarshal(token string, jwtdata interface{}) (bool, error)
+	Verify(token string) (bool, any, error)
 	SetSecretPub(method MethodSigning, key []byte)
 	SetSecretPriv(method MethodSigning, key []byte)
 	SignData(signtype MethodSigning, data interface{}, expires time.Duration) (string, error)
