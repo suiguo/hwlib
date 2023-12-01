@@ -3,15 +3,17 @@ package gjwt
 import (
 	"crypto"
 	"crypto/ed25519"
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
 	gojwt "github.com/golang-jwt/jwt/v5"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type MethodSigning string
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	MethodEd25519   MethodSigning = "MethodEd25519"
@@ -153,7 +155,7 @@ func (u *utils) getMethodEd25519Key() (ed25519.PublicKey, error) {
 	return ed25519.PublicKey(tmp), nil
 }
 
-func (u *utils) VerifyToken(token string, jwtdata interface{}) (verifyrs bool, verifyerr error) {
+func (u *utils) VerifyAndMarshal(token string, jwtdata interface{}) (verifyrs bool, verifyerr error) {
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -199,6 +201,44 @@ func (u *utils) VerifyToken(token string, jwtdata interface{}) (verifyrs bool, v
 		return true, nil
 	}
 	return false, fmt.Errorf("verify fail")
+}
+
+// 验证jwttoken 并返回原始数据
+func (u *utils) Verify(token string) (verifyrs bool, data any, verifyerr error) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			verifyrs = false
+			verifyerr = err.(error)
+		}
+	}()
+	t, err := gojwt.Parse(token, func(t *gojwt.Token) (interface{}, error) {
+		switch method := t.Method.(type) {
+		case *gojwt.SigningMethodRSA:
+			return u.getRSAKey(method)
+		case *gojwt.SigningMethodEd25519:
+			return u.getMethodEd25519Key()
+		case *gojwt.SigningMethodECDSA:
+			return u.getECDSAKey(method)
+		case *gojwt.SigningMethodHMAC:
+			return u.getHMAC(method)
+		case *gojwt.SigningMethodRSAPSS:
+			return u.getRSAPASSKey(method)
+		default:
+			return nil, fmt.Errorf("not support")
+		}
+	})
+	if err != nil {
+		return false, nil, err
+	}
+	if claims, ok := t.Claims.(gojwt.MapClaims); ok && t.Valid {
+		data, ok := claims["data"]
+		if !ok {
+			return true, nil, nil
+		}
+		return true, data, nil
+	}
+	return false, nil, fmt.Errorf("verify fail")
 }
 func (u *utils) SetSecretPub(method MethodSigning, key []byte) {
 	u.secretMap.Store(method, key)
