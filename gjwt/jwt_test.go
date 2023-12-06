@@ -27,10 +27,10 @@ func Ecdsa256() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -47,10 +47,10 @@ func Ecdsa512() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -67,10 +67,10 @@ func Ecdsa384() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 func Ed25519() bool {
@@ -86,10 +86,10 @@ func Ed25519() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -106,10 +106,10 @@ func Rsa256() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -131,10 +131,10 @@ func Rsa512() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -151,10 +151,10 @@ func Rsa384() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -171,10 +171,10 @@ func RsaPss256() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -191,10 +191,10 @@ func RsaPss512() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 
@@ -211,10 +211,10 @@ func RsaPss384() bool {
 	if err != nil {
 		panic(err)
 	}
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	tool.VerifyToken(out2, d2)
-	ok2, err2 := tool.VerifyToken(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	tool.VerifyAndMarshal(out2, d2)
+	ok2, err2 := tool.VerifyAndMarshal(out2, d2)
 	return ok2 && err2 == nil && d2.Data == "1234"
 }
 func TestTool(t *testing.T) {

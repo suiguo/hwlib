@@ -19,7 +19,9 @@ const (
 	PUT    MethodName = "PUT"
 )
 
-var GroupRoter map[RouterGroup][]EndPointGroup
+type Router struct {
+	router map[RouterGroup][]EndPointGroup
+}
 
 type HandlerFunc func(c *gin.Context) any
 
@@ -32,22 +34,25 @@ type EndPointGroup interface {
 	Router(string) HandlerFunc
 }
 
-func RegisterRouter(group RouterGroup, param EndPointGroup) {
+func NewRouter() *Router {
+	return &Router{router: make(map[RouterGroup][]EndPointGroup)}
+}
+func (r *Router) RegisterRouter(group RouterGroup, param EndPointGroup) {
 	if param == nil {
 		return
 	}
-	if GroupRoter == nil {
-		GroupRoter = make(map[RouterGroup][]EndPointGroup)
+	if r.router == nil {
+		r.router = make(map[RouterGroup][]EndPointGroup)
 	}
-	_, ok := GroupRoter[group]
+	_, ok := r.router[group]
 	if !ok {
-		GroupRoter[group] = make([]EndPointGroup, 0)
+		r.router[group] = make([]EndPointGroup, 0)
 	}
-	GroupRoter[group] = append(GroupRoter[group], param)
+	r.router[group] = append(r.router[group], param)
 }
 
-func Package(g *gin.Engine) {
-	for key, roues := range GroupRoter {
+func (r *Router) Package(g *gin.Engine) {
+	for key, roues := range r.router {
 		group := g.Group(string(key))
 		for idx := range roues {
 			h := roues[idx]
