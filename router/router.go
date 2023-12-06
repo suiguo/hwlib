@@ -37,9 +37,9 @@ type EndPointGroup interface {
 func NewRouter() *Router {
 	return &Router{router: make(map[RouterGroup][]EndPointGroup)}
 }
-func (r *Router) RegisterRouter(group RouterGroup, param EndPointGroup) {
+func (r *Router) RegisterRouter(group RouterGroup, param EndPointGroup) *Router {
 	if param == nil {
-		return
+		return r
 	}
 	if r.router == nil {
 		r.router = make(map[RouterGroup][]EndPointGroup)
@@ -49,9 +49,10 @@ func (r *Router) RegisterRouter(group RouterGroup, param EndPointGroup) {
 		r.router[group] = make([]EndPointGroup, 0)
 	}
 	r.router[group] = append(r.router[group], param)
+	return r
 }
 
-func (r *Router) Package(g *gin.Engine) {
+func (r *Router) Package(g *gin.Engine) *gin.Engine {
 	for key, roues := range r.router {
 		group := g.Group(string(key))
 		for idx := range roues {
@@ -82,4 +83,5 @@ func (r *Router) Package(g *gin.Engine) {
 			}
 		}
 	}
+	return g
 }
