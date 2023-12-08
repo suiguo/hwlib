@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 )
 
 type RouterGroup string
@@ -63,7 +64,18 @@ func (r *Router) Package(g *gin.Engine) *gin.Engine {
 				if funcHandler != nil {
 					do := func(ctx *gin.Context) {
 						data := funcHandler(ctx)
-						ctx.SecureJSON(http.StatusOK, data)
+						switch d := data.(type) {
+						case string:
+							ctx.String(http.StatusOK, d)
+						default:
+							out, err := json.Marshal(d)
+							if err != nil {
+								ctx.Status(400)
+							} else {
+								ctx.Writer.WriteHeader(http.StatusOK)
+								ctx.Writer.Write(out)
+							}
+						}
 					}
 					switch val.Method {
 					case Any:
