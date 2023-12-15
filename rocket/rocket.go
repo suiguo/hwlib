@@ -10,20 +10,11 @@ import (
 	"github.com/goccy/go-json"
 )
 
-const (
-	Topic     = "xxxxxx"
-	GroupName = "xxxxxx"
-	Endpoint  = "xxxxxx"
-	Region    = "xxxxxx"
-	AccessKey = "xxxxxx"
-	SecretKey = "xxxxxx"
-)
-
 // 异步处理函数
 type ErrHandler func(data any, err error)
 type Producer interface {
-	SendSync(msg any, delay time.Duration) error
-	SendASync(data any, delay time.Duration, h ErrHandler)
+	SendSync(topic string, msg any, delay time.Duration) error
+	SendASync(topic string, data any, delay time.Duration, h ErrHandler)
 	Close()
 }
 type rocketProducer struct {
@@ -37,7 +28,7 @@ func (r *rocketProducer) Close() {
 }
 
 // 异步发送
-func (r *rocketProducer) SendASync(data any, delay time.Duration, h ErrHandler) {
+func (r *rocketProducer) SendASync(topic string, data any, delay time.Duration, h ErrHandler) {
 	if r.Producer == nil {
 		if h != nil {
 			h(data, errors.New("Producer is nil"))
@@ -52,7 +43,7 @@ func (r *rocketProducer) SendASync(data any, delay time.Duration, h ErrHandler) 
 		return
 	}
 	msg := &golang.Message{
-		Topic: Topic,
+		Topic: topic,
 		Body:  body,
 	}
 	msg.SetDelayTimestamp(time.Now().Add(delay))
@@ -64,7 +55,7 @@ func (r *rocketProducer) SendASync(data any, delay time.Duration, h ErrHandler) 
 }
 
 // 同步发送
-func (r *rocketProducer) SendSync(data any, delay time.Duration) error {
+func (r *rocketProducer) SendSync(topic string, data any, delay time.Duration) error {
 	if r.Producer == nil {
 		return errors.New("Producer is nil")
 	}
@@ -73,7 +64,7 @@ func (r *rocketProducer) SendSync(data any, delay time.Duration) error {
 		return err
 	}
 	msg := &golang.Message{
-		Topic: Topic,
+		Topic: topic,
 		Body:  body,
 	}
 	msg.SetDelayTimestamp(time.Now().Add(delay))
@@ -84,17 +75,17 @@ func (r *rocketProducer) SendSync(data any, delay time.Duration) error {
 	return nil
 }
 
-func NewProducer(group string, namespace string, accessKey string, secretKey string, topic ...string) (Producer, error) {
+func NewProducer(endpoint string, group string, namespace string, accessKey string, secretKey string, topic ...string) (Producer, error) {
 	var credential *credentials.SessionCredentials
 	if accessKey != "" && secretKey != "" {
 		credential = &credentials.SessionCredentials{
-			AccessKey:    AccessKey,
-			AccessSecret: SecretKey,
+			AccessKey:    accessKey,
+			AccessSecret: secretKey,
 		}
 	}
 	producer, err := golang.NewProducer(
 		&golang.Config{
-			Endpoint:      Endpoint,
+			Endpoint:      endpoint,
 			ConsumerGroup: group,
 			NameSpace:     namespace,
 			Credentials:   credential,
