@@ -9,8 +9,6 @@ import (
 	"github.com/apache/rocketmq-clients/golang"
 	"github.com/apache/rocketmq-clients/golang/credentials"
 	"github.com/goccy/go-json"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 // 异步处理函数
@@ -78,12 +76,6 @@ func (r *rocketProducer) SendSync(topic string, data any, delay time.Duration) e
 	return nil
 }
 
-func getEncoder() zapcore.Encoder {
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-	return zapcore.NewConsoleEncoder(encoderConfig)
-}
 func NewProducer(endpoint string, group string, namespace string, accessKey string, secretKey string, topic ...string) (Producer, error) {
 	var credential *credentials.SessionCredentials
 	if accessKey != "" && secretKey != "" {
