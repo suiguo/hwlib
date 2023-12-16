@@ -77,13 +77,6 @@ func (r *rocketProducer) SendSync(topic string, data any, delay time.Duration) e
 }
 
 func NewProducer(endpoint string, group string, namespace string, accessKey string, secretKey string, topic ...string) (Producer, error) {
-	var credential *credentials.SessionCredentials
-	if accessKey != "" && secretKey != "" {
-		credential = &credentials.SessionCredentials{
-			AccessKey:    accessKey,
-			AccessSecret: secretKey,
-		}
-	}
 	os.Setenv("mq.consoleAppender.enabled", "true")
 	golang.ResetLogger()
 	// golang.ResetLogger()
@@ -92,7 +85,10 @@ func NewProducer(endpoint string, group string, namespace string, accessKey stri
 			Endpoint:      endpoint,
 			ConsumerGroup: group,
 			NameSpace:     namespace,
-			Credentials:   credential,
+			Credentials: &credentials.SessionCredentials{
+				AccessKey:    accessKey,
+				AccessSecret: secretKey,
+			},
 		},
 		golang.WithTopics(topic...),
 	)
