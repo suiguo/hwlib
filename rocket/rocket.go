@@ -2,14 +2,18 @@ package rocket
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"time"
 
-	"github.com/apache/rocketmq-clients/golang"
-	"github.com/apache/rocketmq-clients/golang/credentials"
-	"github.com/goccy/go-json"
+	"github.com/apache/rocketmq-clients/golang/v5"
+	"github.com/apache/rocketmq-clients/golang/v5/credentials"
 )
+
+// func Init() {
+// 	golang.NewProducer
+// }
 
 // 异步处理函数
 type ErrHandler func(data any, err error)
@@ -79,7 +83,6 @@ func (r *rocketProducer) SendSync(topic string, data any, delay time.Duration) e
 func NewProducer(endpoint string, group string, namespace string, accessKey string, secretKey string, topic ...string) (Producer, error) {
 	os.Setenv("mq.consoleAppender.enabled", "true")
 	golang.ResetLogger()
-	// golang.ResetLogger()
 	producer, err := golang.NewProducer(
 		&golang.Config{
 			Endpoint:      endpoint,
