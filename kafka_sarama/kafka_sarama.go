@@ -158,6 +158,8 @@ func WithTls(certFile string, keyFile string, caFile string, skip bool) Config {
 type Consumer interface {
 	SubscribeTopics([]string, Handler) error
 	Close(topic string) error
+	Pause()
+	Resume()
 }
 type comsumer struct {
 	addr  []string
@@ -176,6 +178,25 @@ type topicHandler struct {
 	sync.Once
 }
 
+func (c *comsumer) Pause() {
+	c.topics.Range(func(key, value any) bool {
+		h, ok := value.(*topicHandler)
+		if ok {
+			h.ConsumerGroup.PauseAll()
+		}
+		return true
+	})
+}
+
+func (c *comsumer) Resume() {
+	c.topics.Range(func(key, value any) bool {
+		h, ok := value.(*topicHandler)
+		if ok {
+			h.ConsumerGroup.ResumeAll()
+		}
+		return true
+	})
+}
 func (c *comsumer) SubscribeTopics(topic []string, h Handler) error {
 	str := ""
 	for _, val := range topic {
