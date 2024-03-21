@@ -313,6 +313,12 @@ func WithConsumerAutoInterval(Interval time.Duration) Config {
 	}
 }
 
+func WithConsumerAutoDelGroup(timeout time.Duration) Config {
+	return func(c *sarama.Config) {
+		c.Consumer.Group.Session.Timeout = timeout
+	}
+}
+
 type OffsetType int64
 
 const (
