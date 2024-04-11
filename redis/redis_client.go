@@ -65,15 +65,16 @@ type TlsCfg struct {
 	// certFile string, keyFile string, caFile string, skip bool
 }
 type RedisCfg struct {
-	IsCluster bool   `json:"is_cluster"`
-	DbIdx     int    `json:"db_idx"`
-	UserName  string `json:"user_name"`
-	Url       []struct {
-		Host string `json:"host"`
-		Port int    `json:"port"`
-	} `json:"url"`
-	PassWord string  `json:"pwd"`
-	TlsCfg   *TlsCfg `json:"tls"`
+	IsCluster bool        `json:"is_cluster"`
+	DbIdx     int         `json:"db_idx"`
+	UserName  string      `json:"user_name"`
+	Url       []RedisHost `json:"url"`
+	PassWord  string      `json:"pwd"`
+	TlsCfg    *TlsCfg     `json:"tls"`
+}
+type RedisHost struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
 
 func GetInstance(log logger.Logger, cfg *RedisCfg) (*Client, error) {
