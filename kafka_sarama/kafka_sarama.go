@@ -12,6 +12,13 @@ import (
 )
 
 type Algorithm string
+type RequiredAcks sarama.RequiredAcks
+
+const (
+	NoResponse   RequiredAcks = 0
+	WaitForLocal RequiredAcks = 1
+	WaitForAll   RequiredAcks = -1
+)
 
 const (
 	SHA_256 Algorithm = "sha256"
@@ -79,9 +86,9 @@ func (a *asyncproducer) Close() error {
 // type ProductConfig func(*sarama.Config)
 
 // ack
-func WithProductAcks(ack sarama.RequiredAcks) Config {
+func WithProductAcks(ack RequiredAcks) Config {
 	return func(c *sarama.Config) {
-		c.Producer.RequiredAcks = ack
+		c.Producer.RequiredAcks = sarama.RequiredAcks(ack)
 	}
 }
 
