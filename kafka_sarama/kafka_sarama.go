@@ -289,9 +289,8 @@ func (c *comsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.C
 			if strings.Contains(k, fmt.Sprintf("[%s]", msg.Topic)) {
 				h := value.(*topicHandler)
 				if h.h(msg.Topic, msg.Partition, msg.Offset, msg.Value) == nil {
-					if c.autoCommit {
-						sess.MarkMessage(msg, "")
-					} else {
+					sess.MarkMessage(msg, "")
+					if !c.autoCommit {
 						sess.Commit()
 					}
 				}
