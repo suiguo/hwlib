@@ -482,6 +482,13 @@ func (c *Client) ZADD(ctx context.Context, name string, score float64, member in
 	return c.Cc.ZAdd(ctx, name, tmp).Err()
 }
 
+func (c *Client) ZAdd(ctx context.Context, key string, members any, score float64) (int64, error) {
+	if c == nil || c.Cc == nil {
+		return 0, fmt.Errorf("redis not init ")
+	}
+	return c.Cc.ZAdd(ctx, key, redis.Z{Score: score, Member: members}).Result()
+}
+
 // ZRevRangeByScore is for
 func (c *Client) ZRevRangeByScore(ctx context.Context, key, min, max string, count int64) ([]string, error) {
 	if c == nil || c.Cc == nil {
