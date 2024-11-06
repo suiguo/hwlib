@@ -2,6 +2,8 @@ module github.com/suiguo/hwlib
 
 go 1.19
 
+retract [v1.0.1, v1.40.2]
+
 require (
 	github.com/IBM/sarama v1.43.3
 	github.com/confluentinc/confluent-kafka-go v1.9.2
