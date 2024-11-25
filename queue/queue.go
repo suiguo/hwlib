@@ -5,6 +5,10 @@ import (
 	"sync"
 )
 
+var ErrEmpty = fmt.Errorf("queue is empty")
+var ErrLessThanZero = fmt.Errorf("must be greater than 0")
+var ErrNil = fmt.Errorf("v is nil")
+
 type Queue[T any] struct {
 	data []*T
 	idx  int
@@ -22,10 +26,10 @@ func NewQueue[T any](len int) *Queue[T] {
 	return &Queue[T]{data: make([]*T, len)}
 }
 
-// If the queue is full, the oldest value will be replaced
+// If the queue is full, the oldest value will be return
 func (q *Queue[T]) Enqueue(v *T) (*T, error) {
 	if v == nil {
-		return nil, fmt.Errorf("value is nil")
+		return nil, ErrNil
 	}
 	q.Lock()
 	defer q.Unlock()
@@ -47,14 +51,11 @@ func (q *Queue[T]) Dequeue() (*T, error) {
 	q.Lock()
 	defer q.Unlock()
 	if q.isEmpty() {
-		return nil, fmt.Errorf("queue is empty")
+		return nil, ErrEmpty
 	}
 	return q.dequeueOne()
 }
 func (q *Queue[T]) dequeueOne() (*T, error) {
-	if q.isEmpty() {
-		return nil, fmt.Errorf("queue is empty")
-	}
 	v := q.data[q.head]
 	q.data[q.head] = nil
 	q.head = (q.head + 1) % len(q.data)
@@ -63,12 +64,15 @@ func (q *Queue[T]) dequeueOne() (*T, error) {
 
 func (q *Queue[T]) DequeueN(n int) ([]*T, error) {
 	if n <= 0 {
-		return nil, fmt.Errorf("n must be greater than 0")
+		return nil, ErrLessThanZero
 	}
 	tmp := make([]*T, 0, n)
 	q.Lock()
 	defer q.Unlock()
 	for i := 0; i < n; i++ {
+		if q.isEmpty() {
+			return tmp, nil
+		}
 		v, err := q.dequeueOne()
 		if err == nil {
 			tmp = append(tmp, v)
@@ -80,7 +84,7 @@ func (q *Queue[T]) DequeueN(n int) ([]*T, error) {
 }
 func (q *Queue[T]) Peek() (*T, error) {
 	if q.isEmpty() {
-		return nil, fmt.Errorf("queue is empty")
+		return nil, ErrEmpty
 	}
 	return q.data[q.head], nil
 }
